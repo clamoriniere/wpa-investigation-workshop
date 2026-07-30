@@ -172,10 +172,16 @@ header "4/7 Datadog Operator (chart ${OPERATOR_CHART_VERSION})"
 
 # The DatadogAgent and DatadogMetric CRDs ship with this chart
 # (installCRDs: true), so there is no separate CRD step.
+#
+# allowReadAllResources widens the ClusterRole the operator grants the Agent to
+# cover arbitrary resource types. Without it the orchestratorExplorer
+# customResources entry for watermarkpodautoscalers is accepted but collects
+# nothing, because the Cluster Agent cannot list or watch WPA objects.
 helm upgrade --install datadog-operator datadog/datadog-operator \
   --version "${OPERATOR_CHART_VERSION}" \
   --namespace "${DATADOG_NAMESPACE}" \
   --kube-context "$(kube_context)" \
+  --set "clusterRole.allowReadAllResources=true" \
   --wait --timeout 5m >/dev/null
 
 ok "operator running"

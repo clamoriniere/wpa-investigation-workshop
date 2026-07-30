@@ -105,6 +105,7 @@ helm upgrade --install datadog-operator datadog/datadog-operator \
   --version "${OPERATOR_CHART_VERSION}" \
   --namespace "${DATADOG_NAMESPACE}" \
   --kube-context "$(kube_context)" \
+  --set "clusterRole.allowReadAllResources=true" \
   --wait --timeout 5m >/dev/null
 ok "operator reconciled"
 

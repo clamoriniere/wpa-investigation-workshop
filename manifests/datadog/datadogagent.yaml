@@ -43,6 +43,18 @@ spec:
     # verification and by the scoring dashboard.
     kubeStateMetricsCore:
       enabled: true
+    # Sends the WatermarkPodAutoscaler objects themselves to Datadog, so a
+    # participant can read a WPA's spec and status conditions in Kubernetes
+    # Explorer instead of only seeing the wpa_controller_* metrics. WPAs are not
+    # among the CRDs collected automatically, so they are named here.
+    #
+    # enabled is already true by default; spelled out because the workshop
+    # depends on it. The Agent also needs read access to these objects, which is
+    # why setup.sh installs the operator with clusterRole.allowReadAllResources.
+    orchestratorExplorer:
+      enabled: true
+      customResources:
+        - datadoghq.com/v1alpha1/watermarkpodautoscalers
     # Injects DD_AGENT_HOST, DD_ENTITY_ID and DD_EXTERNAL_ENV into pods that
     # carry the admission.datadoghq.com/enabled: "true" label, so a workload
     # never has to work out how to reach the Agent itself.
