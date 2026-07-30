@@ -60,8 +60,8 @@ You can also just `kubectl edit` the live objects.
 `setup.sh` also writes `workspace/README.md`: the list of cases with their titles and namespaces, and
 how to work through them. Start there once the cluster is up.
 
-`solutions/` explains every case. It is plain text on the honour system, and reading it early is the one
-way to get nothing out of this.
+`.solutions/` explains every case. The leading dot only keeps it out of a casual `ls`; it is plain text
+on the honour system, and reading it early is the one way to get nothing out of this.
 
 ## Maintaining a workshop
 
@@ -90,6 +90,6 @@ side.
 | [lib/common.sh](lib/common.sh) | shared shell helpers, pinned versions |
 | [kind/](kind/), [manifests/](manifests/) | cluster and Datadog Agent configuration |
 | [cases-tmpl/](cases-tmpl/) | investigation case templates, rendered into `workspace/` |
-| [solutions/](solutions/) | spoilers |
+| [.solutions/](.solutions/) | spoilers, hidden behind a leading dot |
 | [workshop-plan.md](workshop-plan.md) | requirements and the case list |
 | [IMPLEMENTATION-PLAN.md](IMPLEMENTATION-PLAN.md) | how this repo is built, and the upstream facts it relies on |

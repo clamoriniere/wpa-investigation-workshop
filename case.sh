@@ -118,7 +118,7 @@ cmd_verify() {
     solved=true
     printf '\n%s  solved.%s The WPA can reach its target, is reading its metric, and has scaled.\n' \
       "${_c_green}" "${_c_reset}"
-    printf '  The explanation is in solutions/case-%s.md if you want to compare notes.\n\n' "${id}"
+    printf '  The explanation is in .solutions/case-%s.md if you want to compare notes.\n\n' "${id}"
   else
     printf '\n%s  not solved yet.%s\n\n' "${_c_yellow}" "${_c_reset}"
     cat <<EOF

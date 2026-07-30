@@ -277,5 +277,5 @@ Workshop ready.
 
 Start with workspace/README.md: it lists every case and how to work through it.
 Your working copies live in workspace/ — edit those, not cases-tmpl/.
-Solutions are in solutions/, on the honour system.
+Solutions are in .solutions/, on the honour system.
 EOF

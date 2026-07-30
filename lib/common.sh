@@ -323,9 +323,10 @@ folder where they could drift out of step with it.
 
 ## Solutions
 
-`solutions/` in the repository has a full write-up per case. Nothing stops you
-from reading them — but the diagnostic path is the point of the exercise, so
-they are worth more once you have your own answer to compare against.
+`.solutions/` in the repository has a full write-up per case. The leading dot
+hides it from `ls`, not from you — but the diagnostic path is the point of the
+exercise, so they are worth more once you have your own answer to compare
+against.
 EOF
   } >"${dst}"
 }

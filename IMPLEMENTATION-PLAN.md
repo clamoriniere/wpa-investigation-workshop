@@ -50,7 +50,7 @@ kind/kind-config.yaml
 manifests/datadog/datadogagent.yaml     # template, placeholders substituted at apply time
 cases-tmpl/case-01/{README.md,case.env,app.yaml,loadgen.yaml,wpa.yaml}  # numbered only: a
 cases-tmpl/case-02/{README.md,case.env,app.yaml,wpa.yaml}              # slug would spoil the case
-solutions/{README.md,case-01.md,case-02.md}
+.solutions/{README.md,case-01.md,case-02.md}   # dotted so a casual ls does not spoil it
 workspace/                   # gitignored: rendered, user-editable copies of each case,
                              # plus a generated README.md indexing them
 .cache/                      # gitignored: cloned WPA repo
