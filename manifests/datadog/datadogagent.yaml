@@ -1,0 +1,82 @@
+# Template. setup.sh / update.sh substitute the __TOKEN__ placeholders and apply
+# the result; it is not meant to be applied directly with kubectl.
+apiVersion: datadoghq.com/v2alpha1
+kind: DatadogAgent
+metadata:
+  name: datadog
+  namespace: datadog
+spec:
+  global:
+    site: __DD_SITE__
+    # Becomes the kube_cluster_name tag on every metric, which is how a group
+    # session tells one participant's results from another's.
+    clusterName: __CLUSTER_NAME__
+    credentials:
+      apiSecret:
+        secretName: datadog-secret
+        keyName: api-key
+      # The external metrics server queries the Datadog API, so an APP key is
+      # required here — without it every query returns 403 and all WPAs look
+      # broken for the same wrong reason.
+      appSecret:
+        secretName: datadog-secret
+        keyName: app-key
+    # kind's kubelet serving certificate is not signed by the cluster CA, so
+    # the node Agent's kubelet checks fail unless verification is off. Without
+    # this, container.memory.usage never arrives and case 02 breaks for a
+    # reason that has nothing to do with case 02.
+    kubelet:
+      tlsVerify: false
+    # Tag everything so delete.sh can scope its cleanup to this participant.
+    tags:
+      - "workshop:wpa-investigation"
+      - "workshop_name:__WORKSHOP_NAME__"
+  features:
+    externalMetricsServer:
+      enabled: true
+      # Off by default: this is what makes the Cluster Agent watch
+      # WatermarkPodAutoscaler objects instead of only HPAs.
+      wpaController: true
+      useDatadogMetrics: true
+      registerAPIService: true
+    # Provides kubernetes_state.deployment.replicas_* , used by case
+    # verification and by the scoring dashboard.
+    kubeStateMetricsCore:
+      enabled: true
+    # Injects DD_AGENT_HOST, DD_ENTITY_ID and DD_EXTERNAL_ENV into pods that
+    # carry the admission.datadoghq.com/enabled: "true" label, so a workload
+    # never has to work out how to reach the Agent itself.
+    #
+    # enabled is already true by default; it is spelled out here because the
+    # workshop depends on it.
+    admissionController:
+      enabled: true
+      # Points workloads at the Agent's local service
+      # (datadog-agent.datadog.svc.cluster.local) rather than at a node IP, so
+      # nothing depends on a host port.
+      #
+      # Explicit on purpose. Left unset, the operator derives the mode from
+      # dogstatsd.unixDomainSocketConfig.enabled — which defaults to true — and
+      # picks "socket", injecting DD_DOGSTATSD_URL=unix://... and no
+      # DD_AGENT_HOST at all.
+      agentCommunicationMode: service
+      # Inject into every pod without needing a per-pod label. kube-system and
+      # this namespace are excluded automatically; a pod can still opt out with
+      # admission.datadoghq.com/enabled: "false".
+      mutateUnlabelled: true
+    dogstatsd:
+      # No host port: the local service the operator creates for the node Agent
+      # already exposes 8125/UDP, regardless of this setting. That service is
+      # internalTrafficPolicy: Local, so a packet stays on the node it was sent
+      # from — which is also what lets the Agent resolve the sender's pod UID
+      # into kube_namespace / kube_deployment tags.
+      hostPortConfig:
+        enabled: false
+      # Not needed in service mode, and one less thing to mount on kind.
+      unixDomainSocketConfig:
+        enabled: false
+    # Not needed for the workshop; off to keep a single-node kind cluster light.
+    logCollection:
+      enabled: false
+    apm:
+      enabled: false

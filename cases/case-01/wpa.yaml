@@ -1,0 +1,35 @@
+apiVersion: datadoghq.com/v1alpha1
+kind: WatermarkPodAutoscaler
+metadata:
+  name: case01-app
+  namespace: __CASE_NAMESPACE__
+  labels:
+    workshop-case: "__CASE_ID__"
+spec:
+  # "average" divides the metric by the current replica count before comparing
+  # it to the watermarks. With the default "absolute" the load generator's fixed
+  # gauge of 90 would never come down as replicas are added, so every reconcile
+  # would multiply the target again and the WPA would walk straight to
+  # maxReplicas. Here: 90/1 = 90 > 60 → 2 replicas, then 90/2 = 45, inside the
+  # 30–60 band, and it settles.
+  algorithm: average
+  minReplicas: 1
+  maxReplicas: 5
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: case01-ap
+  metrics:
+    - type: External
+      external:
+        metricName: wpa_workshop.app.load
+        metricSelector:
+          matchLabels:
+            case: "__CASE_ID__"
+            workshop_name: __WORKSHOP_NAME__
+        highWatermark: "60"
+        lowWatermark: "30"
+  tolerance: "0.01"
+  readinessDelaySeconds: 10
+  upscaleForbiddenWindowSeconds: 30
+  downscaleForbiddenWindowSeconds: 30

@@ -1,0 +1,13 @@
+# Single-node kind cluster for the WPA investigation workshop.
+#
+# Single node keeps resource usage low and avoids needing
+# `enable-aggregator-routing`: the API server resolves the Cluster Agent's
+# ClusterIP through kube-proxy on the same node, so the
+# v1beta1.external.metrics.k8s.io APIService works without extra flags.
+#
+# The aggregation layer itself (--requestheader-* / proxy-client certs) is
+# enabled by kubeadm out of the box, so nothing else is required here.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane

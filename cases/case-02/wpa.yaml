@@ -1,0 +1,36 @@
+apiVersion: datadoghq.com/v1alpha1
+kind: WatermarkPodAutoscaler
+metadata:
+  name: case02-app
+  namespace: __CASE_NAMESPACE__
+  labels:
+    workshop-case: "__CASE_ID__"
+spec:
+  # See case 01: without "average" the WPA multiplies its target on every
+  # reconcile and runs to maxReplicas instead of converging.
+  algorithm: average
+  minReplicas: 1
+  maxReplicas: 4
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: case02-app
+  metrics:
+    - type: External
+      external:
+        metricName: container.memory.usage
+        metricSelector:
+          matchLabels:
+            kube_namespace: __CASE_NAMESPACE__
+            kube_deployment: case02-app
+            kube_container_name: case02-app
+        # Measured on this image: an idle nginx:1.27-alpine container sits at
+        # roughly 12.7 MB, so one replica is above the high watermark and two
+        # (12.7/2 = 6.35 MB) land in the middle of the band. Watermarks much
+        # below that — 1M, say — make the WPA ask for a dozen replicas.
+        highWatermark: "8M"
+        lowWatermark: "4M"
+  tolerance: "0.01"
+  readinessDelaySeconds: 10
+  upscaleForbiddenWindowSeconds: 30
+  downscaleForbiddenWindowSeconds: 30

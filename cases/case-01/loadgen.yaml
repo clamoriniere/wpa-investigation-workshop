@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: case01-loadgen
+  namespace: __CASE_NAMESPACE__
+data:
+  # The value the fake application reports as its load. The WPA's high
+  # watermark is 60, so this is deliberately well above it.
+  LOAD_VALUE: "90"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: case01-loadgen
+  namespace: __CASE_NAMESPACE__
+  labels:
+    app: case01-loadgen
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: case01-loadgen
+  template:
+    metadata:
+      labels:
+        app: case01-loadgen
+        # No admission.datadoghq.com/enabled label: the DatadogAgent runs with
+        # mutateUnlabelled: true, so every pod is mutated. The admission
+        # controller injects DD_AGENT_HOST (the Agent's local service name, in
+        # service mode), DD_ENTITY_ID and DD_EXTERNAL_ENV. Mutation happens on
+        # pod creation only, so a pod that starts before the webhook is ready
+        # comes up without them.
+    spec:
+      containers:
+        - name: loadgen
+          image: busybox:1.36
+          env:
+            - name: LOAD_VALUE
+              valueFrom:
+                configMapKeyRef:
+                  name: case01-loadgen
+                  key: LOAD_VALUE
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              if [ -z "${DD_AGENT_HOST}" ]; then
+                echo "DD_AGENT_HOST is empty: the Datadog admission controller did not mutate this pod."
+                echo "It only mutates pods when they are created, so a pod that started before the"
+                echo "Cluster Agent was ready never got the injection. Recreate it with:"
+                echo "  kubectl -n __CASE_NAMESPACE__ rollout restart deployment/case01-loadgen"
+                exit 1
+              fi
+              # A real DogStatsD client library reads DD_ENTITY_ID and sends it
+              # as this internal tag; nc is not a client library, so we do it by
+              # hand. It is what gives the metric its kube_namespace,
+              # kube_deployment and friends without listing them here.
+              while true; do
+                printf '%s' "wpa_workshop.app.load:${LOAD_VALUE}|g|#case:__CASE_ID__,workshop_name:__WORKSHOP_NAME__,dd.internal.entity_id:${DD_ENTITY_ID}" \
+                  | nc -u -w1 "${DD_AGENT_HOST}" 8125
+                sleep 10
+              done
+          resources:
+            requests:
+              cpu: 5m
+              memory: 8Mi
+            limits:
+              cpu: 50m
+              memory: 32Mi

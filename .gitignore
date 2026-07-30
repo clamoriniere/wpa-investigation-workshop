@@ -1,0 +1,14 @@
+# Cloned upstream sources (WPA chart) and other transient downloads
+.cache/
+
+# Rendered, user-editable copies of the investigation cases
+workspace/
+
+# What setup.sh created, including the participant name used to scope deletion
+.workshop-state
+
+# Rendered manifests that may contain credentials
+*.rendered.yaml
+
+# Local Datadog credentials: DD_API_KEY / DD_APP_KEY, sourced before ./setup.sh
+.env
