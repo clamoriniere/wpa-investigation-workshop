@@ -48,23 +48,26 @@ case.sh                      # status / verify / reset / show individual cases
 lib/common.sh                # shared shell helpers, sourced by all scripts
 kind/kind-config.yaml
 manifests/datadog/datadogagent.yaml     # template, placeholders substituted at apply time
-cases/case-01/{README.md,case.env,app.yaml,loadgen.yaml,wpa.yaml}   # numbered only: a
-cases/case-02/{README.md,case.env,app.yaml,wpa.yaml}               # slug would spoil the case
+cases-tmpl/case-01/{README.md,case.env,app.yaml,loadgen.yaml,wpa.yaml}  # numbered only: a
+cases-tmpl/case-02/{README.md,case.env,app.yaml,wpa.yaml}              # slug would spoil the case
 solutions/{README.md,case-01.md,case-02.md}
-workspace/                   # gitignored: rendered, user-editable copies of each case
+workspace/                   # gitignored: rendered, user-editable copies of each case,
+                             # plus a generated README.md indexing them
 .cache/                      # gitignored: cloned WPA repo
 .workshop-state              # gitignored: what setup.sh created
 ```
 
-### `cases/` vs `workspace/`
+### `cases-tmpl/` vs `workspace/`
 
 Each case directory also carries a `case.env` — `CASE_TITLE`, `WPA_NAME`, `DEPLOYMENT`,
 `EXPECTED_MIN_REPLICAS`, `DD_QUERY` — so `case.sh` stays data-driven and adding a case means adding a
 directory, not editing a script. The load generator lives with the case that needs it rather than in a
 shared `manifests/` file, because its namespace, tags and value are all case-specific.
 
-`cases/` holds templates containing `__PLACEHOLDER__` tokens (participant name, cluster name, site).
-`setup.sh` renders them into `workspace/case-NN/` and applies from there. Users edit the files in
+`cases-tmpl/` holds templates containing `__PLACEHOLDER__` tokens (participant name, cluster name,
+site) — the `-tmpl` suffix so that editing there reads as "change every future render" rather than
+"change my copy". `setup.sh` renders them into `workspace/case-NN/` and applies from there, and also
+writes a generated `workspace/README.md` listing every case and how to work through it. Users edit the files in
 `workspace/`, which is why it is gitignored — a `git pull` for new cases can never conflict with
 someone's half-finished investigation. `./case.sh reset NN` re-renders a case from its template.
 

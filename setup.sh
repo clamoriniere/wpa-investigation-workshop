@@ -258,6 +258,9 @@ for id in $(all_case_ids); do
   ok "case ${id} deployed in namespace $(case_namespace "${id}")"
 done
 
+write_workspace_readme
+ok "wrote workspace/README.md"
+
 SETUP_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 save_state
 ok "state written to ${STATE_FILE##*/}"
@@ -272,6 +275,7 @@ Workshop ready.
   ./case.sh verify 01     check whether you have fixed it
   ./case.sh reset 01      start a case over
 
-Your working copies live in workspace/ — edit those, not cases/.
+Start with workspace/README.md: it lists every case and how to work through it.
+Your working copies live in workspace/ — edit those, not cases-tmpl/.
 Solutions are in solutions/, on the honour system.
 EOF

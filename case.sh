@@ -31,25 +31,15 @@ load_case_env() {
   CASE_NS="$(case_namespace "${id}")"
 }
 
-# Read one condition's status off a WPA, e.g. AbleToScale -> "True".
-wpa_condition_status() {
-  local ns="$1" name="$2" type="$3"
-  kc get wpa "${name}" -n "${ns}" \
-    -o jsonpath="{range .status.conditions[?(@.type==\"${type}\")]}{.status}{end}" 2>/dev/null
-}
-
-wpa_condition_reason() {
-  local ns="$1" name="$2" type="$3"
-  kc get wpa "${name}" -n "${ns}" \
-    -o jsonpath="{range .status.conditions[?(@.type==\"${type}\")]}{.reason}{end}" 2>/dev/null
-}
-
-wpa_field() {
-  local ns="$1" name="$2" path="$3"
-  kc get wpa "${name}" -n "${ns}" -o jsonpath="{${path}}" 2>/dev/null
-}
-
 # Returns 0 when the case is solved. Quiet unless verbose=true.
+#
+# The criterion here — reachable target, readable metric, replicas actually
+# moved up — fits every case so far, which is why they differ only by the
+# values in their case.env. A case whose success has a different shape (scaling
+# down, a DatadogMetric that has to become Valid, a condition this does not
+# look at) belongs behind its own check rather than behind a weakened version
+# of this one; wpa_condition_status and friends live in lib/common.sh so such a
+# check can read the object without copying anything.
 check_case() {
   local id="$1" verbose="${2:-false}"
   local able active reason_able reason_active current desired result=0

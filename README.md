@@ -53,9 +53,12 @@ Each case is a namespace containing a deliberately broken WPA and a workload for
 the symptoms the end user reported — never the root cause; working that out from partial information is
 the whole exercise.
 
-`cases/` holds the templates. `setup.sh` renders them into `workspace/case-NN/`, which is what you edit
-(and what is gitignored, so pulling new cases can never clash with a half-finished investigation). You
-can also just `kubectl edit` the live objects.
+`cases-tmpl/` holds the templates. `setup.sh` renders them into `workspace/case-NN/`, which is what you
+edit (and what is gitignored, so pulling new cases can never clash with a half-finished investigation).
+You can also just `kubectl edit` the live objects.
+
+`setup.sh` also writes `workspace/README.md`: the list of cases with their titles and namespaces, and
+how to work through them. Start there once the cluster is up.
 
 `solutions/` explains every case. It is plain text on the honour system, and reading it early is the one
 way to get nothing out of this.
@@ -86,7 +89,7 @@ side.
 | [setup.sh](setup.sh), [update.sh](update.sh), [delete.sh](delete.sh), [case.sh](case.sh) | the workshop lifecycle |
 | [lib/common.sh](lib/common.sh) | shared shell helpers, pinned versions |
 | [kind/](kind/), [manifests/](manifests/) | cluster and Datadog Agent configuration |
-| [cases/](cases/) | investigation case templates |
+| [cases-tmpl/](cases-tmpl/) | investigation case templates, rendered into `workspace/` |
 | [solutions/](solutions/) | spoilers |
 | [workshop-plan.md](workshop-plan.md) | requirements and the case list |
 | [IMPLEMENTATION-PLAN.md](IMPLEMENTATION-PLAN.md) | how this repo is built, and the upstream facts it relies on |

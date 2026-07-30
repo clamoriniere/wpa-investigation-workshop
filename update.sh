@@ -171,6 +171,11 @@ for id in ${PREVIOUS_CASES//,/ }; do
   fi
 done
 
+# Rewritten every time, so the case list stays in step with what is deployed.
+# It holds no user edits, unlike everything else under workspace/.
+write_workspace_readme
+ok "refreshed workspace/README.md"
+
 # ---------------------------------------------------------------------------
 # 5. Gate and state
 # ---------------------------------------------------------------------------
