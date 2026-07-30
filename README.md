@@ -76,6 +76,43 @@ will remove and asks before doing it; it is scoped by `workshop_name`, so it wil
 colleague's objects in a shared org. Note that metrics already submitted cannot be deleted — and that
 `wpa_workshop.app.load` is a custom metric, so a forgotten cluster keeps costing you.
 
+## Writing a new case
+
+A case is just a directory: `all_case_ids()` globs `cases-tmpl/case-*/`, so creating
+`cases-tmpl/case-03/` is what registers it. What it has to contain, and the invariants that are easy
+to get wrong — `algorithm: average`, the watermark arithmetic, which `__TOKEN__`s exist, how not to
+spoil the case in its own filename — are written up as a Claude Code skill in
+[.claude/skills/new-case/SKILL.md](.claude/skills/new-case/SKILL.md).
+
+### Using it with Claude Code
+
+The skill is committed with the repo, so there is nothing to install: Claude Code discovers
+`.claude/skills/*/SKILL.md` in the project you have open. Clone the repo, start `claude` from its
+root, and:
+
+```
+/new-case
+```
+
+or just ask for a new case in your own words — the `description:` in the skill's frontmatter is what
+Claude matches against, so "add a case about a WPA stuck in dry-run" reaches it too. `/help` lists it
+among the available skills; if it is missing, you started Claude Code somewhere other than the
+repository root.
+
+To have it available in every project rather than this one, copy the directory into your personal
+skills folder:
+
+```bash
+cp -r .claude/skills/new-case ~/.claude/skills/
+```
+
+### Using it with another agent
+
+`SKILL.md` is Markdown with a small YAML frontmatter block (`name`, `description`) and no
+Claude-Code-specific syntax in the body. Any agent that takes instructions from a file can use it —
+point yours at the path, or paste the body in as context before asking for a case. The frontmatter is
+metadata for skill discovery; it is safe to drop when pasting.
+
 ## Running it as a group
 
 Set a different `WORKSHOP_NAME` per participant. It becomes the cluster name and therefore the
@@ -91,5 +128,5 @@ side.
 | [kind/](kind/), [manifests/](manifests/) | cluster and Datadog Agent configuration |
 | [cases-tmpl/](cases-tmpl/) | investigation case templates, rendered into `workspace/` |
 | [.solutions/](.solutions/) | spoilers, hidden behind a leading dot |
+| [.claude/skills/new-case/](.claude/skills/new-case/) | how to author a new case, as a Claude Code skill |
 | [workshop-plan.md](workshop-plan.md) | requirements and the case list |
-| [IMPLEMENTATION-PLAN.md](IMPLEMENTATION-PLAN.md) | how this repo is built, and the upstream facts it relies on |

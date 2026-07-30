@@ -12,3 +12,9 @@ workspace/
 
 # Local Datadog credentials: DD_API_KEY / DD_APP_KEY, sourced before ./setup.sh
 .env
+
+# Build notes for this repo, not part of the workshop
+IMPLEMENTATION-PLAN.md
+
+# Per-user Claude Code permissions, not shared
+.claude/settings.local.json
