@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: case06-loadgen
+  namespace: __CASE_NAMESPACE__
+data:
+  # The value the fake worker reports as its queue depth. The WPA's high
+  # watermark is 80, so this is deliberately well above it. The queue was
+  # renamed from "orders" to "orders-v2" during a migration; the loadgen
+  # emits the current name.
+  LOAD_VALUE: "100"
+  QUEUE_NAME: "orders-v2"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: case06-loadgen
+  namespace: __CASE_NAMESPACE__
+  labels:
+    app: case06-loadgen
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: case06-loadgen
+  template:
+    metadata:
+      labels:
+        app: case06-loadgen
+        # No admission.datadoghq.com/enabled label: the DatadogAgent runs with
+        # mutateUnlabelled: true, so every pod is mutated. Mutation happens on
+        # pod creation only, so a pod that starts before the webhook is ready
+        # comes up without DD_AGENT_HOST.
+    spec:
+      containers:
+        - name: loadgen
+          image: busybox:1.36
+          env:
+            - name: LOAD_VALUE
+              valueFrom:
+                configMapKeyRef:
+                  name: case06-loadgen
+                  key: LOAD_VALUE
+            - name: QUEUE_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: case06-loadgen
+                  key: QUEUE_NAME
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              if [ -z "${DD_AGENT_HOST}" ]; then
+                echo "DD_AGENT_HOST is empty: the Datadog admission controller did not mutate this pod."
+                echo "It only mutates pods when they are created, so a pod that started before the"
+                echo "Cluster Agent was ready never got the injection. Recreate it with:"
+                echo "  kubectl -n __CASE_NAMESPACE__ rollout restart deployment/case06-loadgen"
+                exit 1
+              fi
+              while true; do
+                printf '%s' "wpa_workshop.orders.queue_depth:${LOAD_VALUE}|g|#case:__CASE_ID__,queue:${QUEUE_NAME},workshop_name:__WORKSHOP_NAME__,dd.internal.entity_id:${DD_ENTITY_ID}" \
+                  | nc -u -w1 "${DD_AGENT_HOST}" 8125
+                sleep 10
+              done
+          resources:
+            requests:
+              cpu: 5m
+              memory: 8Mi
+            limits:
+              cpu: 50m
+              memory: 32Mi

@@ -12,8 +12,13 @@ adds it.
 
 ## Before writing anything
 
-Settle these three, in this order. Getting the fault wrong makes everything downstream
-busywork.
+**Ask the user first**, unless they already stated it: what scenario/fault do they want this
+case to teach, and how should a fix be verified (the shared `AbleToScale` +
+`ScalingActive` + `EXPECTED_MIN_REPLICAS` check, or does this one need its own `check.sh`
+per Verify criterion below). Do not guess a fault and start writing files — the scenario is
+the one thing downstream busywork can't fix if wrong.
+
+Once the scenario is settled, work through these three, in order:
 
 1. **The fault.** One root cause, reachable from `kubectl describe wpa` plus Cluster Agent
    logs. It must be a *realistic misconfiguration* — something a person would actually

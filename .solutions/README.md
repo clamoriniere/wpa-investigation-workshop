@@ -18,3 +18,7 @@ If you are stuck, the order that usually unblocks people is:
 
 - [Case 01](case-01.md)
 - [Case 02](case-02.md)
+- [Case 03](case-03.md)
+- [Case 04](case-04.md)
+- [Case 05](case-05.md)
+- [Case 06](case-06.md)

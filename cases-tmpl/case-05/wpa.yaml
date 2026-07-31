@@ -1,0 +1,35 @@
+apiVersion: datadoghq.com/v1alpha1
+kind: WatermarkPodAutoscaler
+metadata:
+  name: case05-app
+  namespace: __CASE_NAMESPACE__
+  labels:
+    workshop-case: "__CASE_ID__"
+spec:
+  # See case 01: without "average" the WPA multiplies its target on every
+  # reconcile and runs to maxReplicas instead of converging.
+  algorithm: average
+  # Left over from a load test: forces the deployment straight to 4 replicas
+  # on the very first reconcile (current 1 < minReplicas), then the floor never
+  # lets it come back down, no matter how idle the metric is. A fixed value of
+  # 1 lets 5/1=5 (still below the low watermark of 20) settle there instead.
+  minReplicas: 4
+  maxReplicas: 6
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: case05-app
+  metrics:
+    - type: External
+      external:
+        metricName: wpa_workshop.checkout.queue_depth
+        metricSelector:
+          matchLabels:
+            case: "__CASE_ID__"
+            workshop_name: __WORKSHOP_NAME__
+        highWatermark: "40"
+        lowWatermark: "20"
+  tolerance: "0.01"
+  readinessDelaySeconds: 10
+  upscaleForbiddenWindowSeconds: 30
+  downscaleForbiddenWindowSeconds: 30

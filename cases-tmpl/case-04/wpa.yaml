@@ -1,0 +1,34 @@
+apiVersion: datadoghq.com/v1alpha1
+kind: WatermarkPodAutoscaler
+metadata:
+  name: case04-app
+  namespace: __CASE_NAMESPACE__
+  labels:
+    workshop-case: "__CASE_ID__"
+spec:
+  # See case 01: without "average" the WPA multiplies its target on every
+  # reconcile and runs to maxReplicas instead of converging.
+  algorithm: average
+  minReplicas: 1
+  # Set for a traffic level the service outgrew: unconstrained, 180/N lands
+  # inside the 20-40 band at N=5 (180/5=36), but maxReplicas caps it at 3
+  # (180/3=60, still above the high watermark) and it never gets there.
+  maxReplicas: 3
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: case04-app
+  metrics:
+    - type: External
+      external:
+        metricName: wpa_workshop.orders.processing_lag
+        metricSelector:
+          matchLabels:
+            case: "__CASE_ID__"
+            workshop_name: __WORKSHOP_NAME__
+        highWatermark: "40"
+        lowWatermark: "20"
+  tolerance: "0.01"
+  readinessDelaySeconds: 10
+  upscaleForbiddenWindowSeconds: 30
+  downscaleForbiddenWindowSeconds: 30

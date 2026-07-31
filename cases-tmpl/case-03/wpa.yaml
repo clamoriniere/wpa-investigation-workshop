@@ -1,0 +1,37 @@
+apiVersion: datadoghq.com/v1alpha1
+kind: WatermarkPodAutoscaler
+metadata:
+  name: case03-app
+  namespace: __CASE_NAMESPACE__
+  labels:
+    workshop-case: "__CASE_ID__"
+spec:
+  # See case 01: without "average" the WPA multiplies its target on every
+  # reconcile and runs to maxReplicas instead of converging. 50/1 = 50 > 40 ->
+  # 2 replicas, then 50/2 = 25, inside the 20-40 band, and it settles.
+  algorithm: average
+  # Left on from an earlier trial run: with dryRun true the controller still
+  # computes AbleToScale/ScalingActive and status.desiredReplicas correctly on
+  # every reconcile, it just never calls the scale subresource, so
+  # currentReplicas never moves.
+  dryRun: true
+  minReplicas: 1
+  maxReplicas: 5
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: case03-app
+  metrics:
+    - type: External
+      external:
+        metricName: wpa_workshop.queue.depth
+        metricSelector:
+          matchLabels:
+            case: "__CASE_ID__"
+            workshop_name: __WORKSHOP_NAME__
+        highWatermark: "40"
+        lowWatermark: "20"
+  tolerance: "0.01"
+  readinessDelaySeconds: 10
+  upscaleForbiddenWindowSeconds: 30
+  downscaleForbiddenWindowSeconds: 30

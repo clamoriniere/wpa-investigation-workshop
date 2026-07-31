@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: __CASE_NAMESPACE__
+  labels:
+    workshop: wpa-investigation
+    workshop-case: "__CASE_ID__"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: case04-app
+  namespace: __CASE_NAMESPACE__
+  labels:
+    app: case04-app
+spec:
+  # No replicas field on purpose: the WPA owns the replica count.
+  selector:
+    matchLabels:
+      app: case04-app
+  template:
+    metadata:
+      labels:
+        app: case04-app
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27-alpine
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi

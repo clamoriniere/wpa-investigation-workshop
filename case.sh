@@ -43,12 +43,24 @@ load_case_env() {
 check_case() {
   local id="$1" verbose="${2:-false}"
   local able active reason_able reason_active current desired result=0
+  local dir
 
   load_case_env "${id}"
+  dir="$(case_dir "${id}")" || die "unknown case '${id}'"
 
   if ! kc get wpa "${WPA_NAME}" -n "${CASE_NS}" >/dev/null 2>&1; then
     [[ "${verbose}" == true ]] && fail "no WatermarkPodAutoscaler ${WPA_NAME} in ${CASE_NS} — try ./case.sh reset ${id}"
     return 1
+  fi
+
+  # A case whose success has a different shape than "reachable, readable,
+  # scaled up" (e.g. a downscale) brings its own check.sh instead of weakening
+  # this one. It runs with CASE_NS/WPA_NAME/verbose already in scope and the
+  # wpa_condition_* / wpa_field helpers below, and must set `result`.
+  if [[ -f "${dir}/check.sh" ]]; then
+    # shellcheck disable=SC1090
+    source "${dir}/check.sh"
+    return "${result}"
   fi
 
   able="$(wpa_condition_status "${CASE_NS}" "${WPA_NAME}" AbleToScale)"
