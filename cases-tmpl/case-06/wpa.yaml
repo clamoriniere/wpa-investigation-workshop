@@ -37,6 +37,7 @@ spec:
         # carrying metricName + metricSelector directly, the way cases 01/02/04
         # do. The Cluster Agent resolves this to that object's own spec.query.
         metricName: "datadogmetric@__CASE_NAMESPACE__:case06-orders-queue"
+        metricSelector: {}
         highWatermark: "80"
         lowWatermark: "40"
   tolerance: "0.01"

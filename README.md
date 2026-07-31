@@ -35,6 +35,14 @@ controller, the Datadog Operator, and an Agent with the external metrics server 
 every investigation case. It refuses to finish unless `external.metrics.k8s.io` is genuinely serving,
 because a broken APIService makes every case look broken for the wrong reason.
 
+If `kubectl` isn't already pointed at the workshop cluster (new shell, `setup.sh` ran a while ago, etc.):
+
+```bash
+kind get clusters                                          # find it — wpa-workshop-<name>
+kind export kubeconfig --name wpa-workshop-${WORKSHOP_NAME} # point kubectl at it
+kubectl config current-context                             # sanity check: kind-wpa-workshop-<name>
+```
+
 Then work through the cases:
 
 ```bash
