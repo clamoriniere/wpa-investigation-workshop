@@ -25,11 +25,11 @@ spec:
             kube_deployment: case02-app
             kube_container_name: case02-app
         # Measured on this image: an idle nginx:1.27-alpine container sits at
-        # roughly 12.7 MB, so one replica is above the high watermark and two
-        # (12.7/2 = 6.35 MB) land in the middle of the band. Watermarks much
-        # below that — 1M, say — make the WPA ask for a dozen replicas.
-        highWatermark: "8M"
-        lowWatermark: "4M"
+        # roughly 2.7 MB, so one replica is above the high watermark and two
+        # (2.7/2 = 1.35 MB) land in the middle of the band. Watermarks much
+        # below that — 400k, say — make the WPA ask for a dozen replicas.
+        highWatermark: "1.7M"
+        lowWatermark: "850k"
   tolerance: "0.01"
   readinessDelaySeconds: 10
   upscaleForbiddenWindowSeconds: 30
